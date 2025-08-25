@@ -9,6 +9,6 @@ protocol ESPFinder {
 	/// Найти все девайсы в локальной сети
 	func discover(
 		onDiscover: @escaping (ESPDevice) -> Void,
-		onProgress: @escaping (Int) -> Void
+		onProgress: @escaping (Double) -> Void
 	) async throws(ESPFinderError)
 }

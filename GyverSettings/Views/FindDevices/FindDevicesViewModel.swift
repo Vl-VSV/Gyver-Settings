@@ -14,12 +14,19 @@ final class FindDevicesViewModel: ObservableObject {
 
 	@Published var selectedDevice: ESPDevice?
 
+	@Published var showAboutView: Bool = false
+
 	private let espFinder: ESPFinder
+	private let cacheManager: ESPCacheManager
 
 	init(
-		espFinder: ESPFinder = ESPFinderImpl()
+		espFinder: ESPFinder = ESPFinderImpl(),
+		cacheManager: ESPCacheManager = ESPCacheManagerImpl()
 	) {
 		self.espFinder = espFinder
+		self.cacheManager = cacheManager
+
+		loadDevicesFromCache()
 	}
 
 	func startScanning() {
@@ -40,13 +47,31 @@ final class FindDevicesViewModel: ObservableObject {
 	@MainActor
 	private func startSearching() async {
 		do {
-			try await espFinder.discover { @MainActor [weak self] in
+			try await espFinder.discover { [weak self] in
 				self?.foundDevices.append($0)
-			} onProgress: { @MainActor [weak self] in
+			} onProgress: { [weak self] in
 				self?.status = .scanning(progress: $0)
 			}
+
+			saveDevices()
 		} catch {
 			print("Error: \(error)")
+		}
+	}
+
+	private func loadDevicesFromCache() {
+		do {
+			foundDevices = try cacheManager.loadDevices()
+		} catch {
+			print("Failed to load cached devices: \(error)")
+		}
+	}
+
+	private func saveDevices() {
+		do {
+			try cacheManager.saveDevices(foundDevices)
+		} catch {
+			print("Failed to save devices: \(error)")
 		}
 	}
 }
@@ -54,7 +79,7 @@ final class FindDevicesViewModel: ObservableObject {
 extension FindDevicesViewModel {
 	enum Status: Identifiable {
 		case initial
-		case scanning(progress: Int)
+		case scanning(progress: Double)
 		case done
 
 		enum ID {

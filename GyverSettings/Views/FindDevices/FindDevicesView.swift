@@ -11,7 +11,7 @@ struct FindDevicesView: View {
 	@StateObject var viewModel: FindDevicesViewModel
 
 	var body: some View {
-		ScrollView {
+		ScrollView(showsIndicators: false) {
 			Section {
 				scannedDevices
 			} header: {
@@ -21,15 +21,13 @@ struct FindDevicesView: View {
 			}
 
 		}
-		.scrollIndicators(.hidden)
 		.padding()
 		.overlay(alignment: .bottom) {
-			VStack {
-				if case let .scanning(value) = viewModel.status {
-					progressBar(value)
-				}
-
-				scanButton
+			scanSection
+		}
+		.toolbar {
+			ToolbarItem {
+				aboutApp
 			}
 		}
 		.fullScreenCover(item: $viewModel.selectedDevice) { device in
@@ -37,6 +35,19 @@ struct FindDevicesView: View {
 				SafariView(url: url)
 					.ignoresSafeArea()
 			}
+		}
+		.sheet(isPresented: $viewModel.showAboutView) {
+			AboutView()
+		}
+	}
+
+	private var scanSection: some View {
+		VStack {
+			if case let .scanning(value) = viewModel.status {
+				progressBar(value)
+			}
+
+			scanButton
 		}
 	}
 
@@ -47,8 +58,8 @@ struct FindDevicesView: View {
 			HStack {
 				Image(systemName: "magnifyingglass")
 				Text("Сканировать устройства")
+					.fontWeight(.semibold)
 			}
-			.fontWeight(.semibold)
 			.padding(.horizontal, 24)
 			.padding(.vertical, 12)
 			.buttonStyle(.plain)
@@ -60,16 +71,28 @@ struct FindDevicesView: View {
 		}
 	}
 
+	@ViewBuilder
 	private var scannedDevices: some View {
-		VStack {
-			ForEach(viewModel.foundDevices) {
-				deviceCard($0)
+		if viewModel.status.id == .done && viewModel.foundDevices.isEmpty {
+			nothingFound
+		} else {
+			VStack {
+				ForEach(viewModel.foundDevices) {
+					deviceCard($0)
+				}
 			}
+			.frame(maxWidth: .infinity)
 		}
-		.frame(maxWidth: .infinity)
 	}
 
-	private func progressBar(_ progress: Int) -> some View {
+	private var nothingFound: some View {
+		Text("Устройства не найдены")
+			.font(.headline)
+			.foregroundStyle(.secondary)
+			.padding(32)
+	}
+
+	private func progressBar(_ progress: Double) -> some View {
 		VStack(alignment: .leading, spacing: 8) {
 			ProgressView(value: Float(progress), total: 100)
 				.progressViewStyle(.linear)
@@ -77,7 +100,7 @@ struct FindDevicesView: View {
 			Text(
 				progress == 0 ?
 				"Ожидание сканирования" :
-				"Cканирование... \(progress)%"
+				"Cканирование... \(Int(progress))%"
 			)
 			.font(.subheadline)
 			.foregroundStyle(.secondary)
@@ -86,7 +109,7 @@ struct FindDevicesView: View {
 		.frame(maxWidth: .infinity)
 		.cornerRadius(16)
 		.shadow(radius: 4, y: 2)
-		.padding()
+		.padding(.horizontal)
 	}
 
 	private func deviceCard(_ device: ESPDevice) -> some View {
@@ -96,6 +119,7 @@ struct FindDevicesView: View {
 			HStack(spacing: 16) {
 				Image(systemName: "wifi.router")
 					.font(.title3)
+					.foregroundStyle(.blue)
 
 				VStack(alignment: .leading, spacing: 4) {
 					Text(device.name)
@@ -108,17 +132,24 @@ struct FindDevicesView: View {
 				Spacer()
 
 				Image(systemName: "chevron.right")
-					.foregroundColor(.gray)
-					.fontWeight(.bold)
 			}
 			.padding()
 			.frame(maxWidth: .infinity, alignment: .leading)
 			.background {
-				Capsule().stroke(style: .init(lineWidth: 2))
+				RoundedRectangle(cornerRadius: 20).stroke(style: .init(lineWidth: 2))
+					.foregroundStyle(.secondary)
 			}
 			.padding()
 		}
 		.buttonStyle(.plain)
+	}
+
+	private var aboutApp: some View {
+		Button {
+			viewModel.showAboutView.toggle()
+		} label: {
+			Label("О программе", systemImage: "info.circle")
+		}
 	}
 }
 

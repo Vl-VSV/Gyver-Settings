@@ -11,7 +11,9 @@ import SwiftUI
 struct GyverSettingsApp: App {
     var body: some Scene {
         WindowGroup {
-            FindDevicesView(viewModel: FindDevicesViewModel())
+			NavigationView {
+				FindDevicesView(viewModel: FindDevicesViewModel())
+			}
         }
     }
 }
