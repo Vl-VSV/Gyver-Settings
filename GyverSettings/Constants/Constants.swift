@@ -13,7 +13,7 @@ enum Constants {
 
 Быстро находите устройства, переходите к их веб-интерфейсам, управляйте настройками легко!
 
-Библиотека Settings разработана [AlexGyver](https://github.com/AlexGyver?ysclid=mer7x97jb1901474028)
+Библиотека Settings разработана [AlexGyver](https://github.com/AlexGyver)
 """
 
 	static let author = "Автор: [Владислав Воронин](https://github.com/Vl-VSV)"
