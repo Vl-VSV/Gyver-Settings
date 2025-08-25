@@ -14,6 +14,7 @@ struct GyverSettingsApp: App {
 			NavigationView {
 				FindDevicesView(viewModel: FindDevicesViewModel())
 			}
+			.navigationViewStyle(.stack)
         }
     }
 }
