@@ -6,11 +6,10 @@
     {
       "layers" : [
         {
-          "glass" : true,
-          "image-name" : "kitlogo_wide_opt 3.svg",
-          "name" : "kitlogo_wide_opt 3",
+          "image-name" : "favicon 2.svg",
+          "name" : "favicon 2",
           "position" : {
-            "scale" : 9,
+            "scale" : 2.5,
             "translation-in-points" : [
               0,
               0
